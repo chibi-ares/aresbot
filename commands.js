@@ -27,7 +27,7 @@ async function init () {
 
 async function send (args, configFile) {
   console.log(chalk.bold(`\nSending message...`))
-  let message = args.message || args._.slice(1).join(' ')
+  let messages = [args.message || args._.slice(1).join(' ')]
   const bot = await lib.initBot()
   const { chats = {} } = await lib.openConfig()
   const chatIds = Object.keys(chats)
@@ -50,19 +50,23 @@ async function send (args, configFile) {
     if (logText.length > 0) {
       logText = logText.join('\n')
       logText = `Latest commits: \n${logText}`
-      message = [message, logText].filter(Boolean).join('\n<code>------------</code>\n')
+      messages = [...messages, logText]
     }
     config.log = { lastHash: logs.latest.hash }
     await lib.saveConfig(config)
   }
 
-  if (message && message !== true) {
-    message = ('' + message).replace('\\n', '\n')
-    await Promise.all(chatIds.map(id => {
-      const { title, username } = chats[id]
-      console.log(chalk.cyan(` - sending to ${title || username}:${id}`))
-      return bot.sendMessage(id, message, { parse_mode: 'HTML' })
-    }))
+  messages = messages.filter(w => !!w && w !== true)
+
+  if (messages.length > 0) {
+    for (let message of messages) {
+      message = ('' + message).replace('\\n', '\n')
+      await Promise.all(chatIds.map(id => {
+        const { title, username } = chats[id]
+        console.log(chalk.cyan(` - sending to ${title || username}:${id}`))
+        return bot.sendMessage(id, message, { parse_mode: 'HTML' })
+      }))
+    }
   }
   
   process.exit()
