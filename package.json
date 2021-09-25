@@ -15,5 +15,8 @@
     "minimist": "^1.2.5",
     "node-telegram-bot-api": "^0.54.0",
     "readline-sync": "^1.4.10"
+  },
+  "devDependencies": {
+    "simple-git": "^2.45.1"
   }
 }
