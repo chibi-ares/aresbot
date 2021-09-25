@@ -100,7 +100,7 @@ async function help () {
   console.log('Usage:')
   console.log('npx aresbot init')
   console.log('npx aresbot capture')
-  console.log('npx aresbot send --message message text')
+  console.log('npx aresbot send --message "message text" --log')
 }
   
 module.exports = {
