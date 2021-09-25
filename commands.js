@@ -50,7 +50,7 @@ async function send (args, configFile) {
     if (logText.length > 0) {
       logText = logText.join('\n')
       logText = `Latest commits: \n${logText}`
-      message = [message, logText].filter(Boolean).join('\n\n')
+      message = [message, logText].filter(Boolean).join('\n<code>------------</code>\n')
     }
     config.log = { lastHash: logs.latest.hash }
     await lib.saveConfig(config)
