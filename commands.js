@@ -28,19 +28,43 @@ async function init () {
 async function send (args, configFile) {
   console.log(chalk.bold(`\nSending message...`))
   let message = args.message || args._.slice(1).join(' ')
+  const bot = await lib.initBot()
+  const { chats = {} } = await lib.openConfig()
+  const chatIds = Object.keys(chats)
+
+  if (args.log) {
+    const git = require('simple-git')()
+    const config = await lib.openConfig()
+    const lastHash = config.log?.lastHash
+    let logs = await git.log({ maxCount: 1000 })
+    const promises = []
+    let logText = []
+    for (const { hash, message, author_name, refs, date } of logs.all) {
+      if (hash === lastHash) break
+      let formattedDate = new Date(date)
+      formattedDate = formattedDate.toLocaleDateString().slice(0, 5) +
+        ' ' + formattedDate.toLocaleTimeString().slice(0, 5)
+      const author = author_name.split(' ').map(s=>s[0]).join('')
+      logText.push(`• ${formattedDate} <b>${message}</b>` + (refs ? ` <code>(${refs})</code>` : '') + ` (${author})`)
+    }
+    if (logText.length > 0) {
+      logText = logText.join('\n')
+      logText = `Latest commits: \n${logText}`
+      message = [message, logText].filter(Boolean).join('\n\n')
+    }
+    config.log = { lastHash: logs.latest.hash }
+    await lib.saveConfig(config)
+  }
+
   if (message && message !== true) {
-    const bot = await lib.initBot()
-    const { chats = {} } = await lib.openConfig()
-    const chatIds = Object.keys(chats)
     message = ('' + message).replace('\\n', '\n')
     await Promise.all(chatIds.map(id => {
       const { title, username } = chats[id]
       console.log(chalk.cyan(` - sending to ${title || username}:${id}`))
       return bot.sendMessage(id, message, { parse_mode: 'HTML' })
     }))
-  } else {
-    throw new Error('nothing to send!')
   }
+  
   process.exit()
 }
 
