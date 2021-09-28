@@ -28,6 +28,7 @@ async function init () {
 async function send (args, configFile) {
   console.log(chalk.bold(`\nSending message...`))
   let messages = [args.message || args._.slice(1).join(' ')]
+  const maxCount = +args['max-count'] || 10
   const bot = await lib.initBot()
   const { chats = {} } = await lib.openConfig()
   const chatIds = Object.keys(chats)
@@ -36,7 +37,7 @@ async function send (args, configFile) {
     const git = require('simple-git')()
     const config = await lib.openConfig()
     const lastHash = config.log?.lastHash
-    let logs = await git.log({ maxCount: 1000 })
+    let logs = await git.log({ maxCount })
     const promises = []
     let logText = []
     for (const { hash, message, author_name, refs, date } of logs.all) {
@@ -104,7 +105,7 @@ async function help () {
   console.log('Usage:')
   console.log('npx aresbot init')
   console.log('npx aresbot capture')
-  console.log('npx aresbot send --message "message text" --log')
+  console.log('npx aresbot send --message "message text" --log --max-count 10')
 }
   
 module.exports = {
